@@ -39,7 +39,7 @@ class Allegro {
 		}
 		catch(SoapFault $error)	{
 			//todo: jesli nie ma funkcji do bledow, implementuje ja, jesli jest to zglasza blad ze nie laczy z allegro
-			die("Blad: polaczenia z allegro");
+			die("Blad polaczenia z allegro");
 		}
 		
 	//</__construct>
@@ -49,6 +49,7 @@ class Allegro {
 		 * getItemCount 
 		 * build: 260316
 		 * version: 1.0
+		 * return: int or bool(false)
 		 */
 		//typy aukcji - patrz dokumentacja allegro 
 		$types = array('bid','won','not_won','watch','watch_cl','sell', 'sold', 'not_sold', 'future');
@@ -63,9 +64,4 @@ class Allegro {
 	}
 //koniec klasy
 }
-	
-$allegro = new Allegro;
-
-	
-	
 ?>
