@@ -37,9 +37,9 @@ class Allegro {
 														$this -> verkey );
 			$this -> session_handler = $this ->login['session-handle-part'];
 		}
-		catch(SoapFault $error)	{
+		catch(SoapFault $e)	{
 			//todo: jesli nie ma funkcji do bledow, implementuje ja, jesli jest to zglasza blad ze nie laczy z allegro
-			die("Blad polaczenia z allegro");
+			die('Failed to connect: '.$e->getMessage(););
 		}
 		
 	//</__construct>
@@ -47,20 +47,42 @@ class Allegro {
 	public function getItemCount($type) {
 		/*
 		 * getItemCount 
-		 * build: 260316
-		 * version: 1.0
-		 * return: int or bool(false)
+		 * @build: 290316
+		 * @version: 1.1
+		 * @return: int or bool(false)
 		 */
 		//typy aukcji - patrz dokumentacja allegro 
 		$types = array('bid','won','not_won','watch','watch_cl','sell', 'sold', 'not_sold', 'future');
 		$type = strtolower($type); 
 		if(in_array($type, $types)) {
-			$result = $this->soap -> doMyAccountItemsCount($this -> session_handler, $type,  array());
+			$result = $this-> soap -> doMyAccountItemsCount($this -> session_handler, $type,  array());
 			return $result;
 		} else {
-			return false;
+			throw new Exception("Unspecified offer type");
 		}
 	//</getItemCount>
+	}
+		public function checkIfItemSold($id) {
+		/** 
+		  * checkIfItemSold
+		  * @build 290316
+		  * @version: 1.0
+		  * @param $id long
+		  * @return  bool
+		  */
+		  if(!is_numeric($id)) {
+			  throw new Exception("ID must be numeric");
+		  } else {
+			$request = $this-> soap -> doGetItemsInfo($this -> session_handler, array($id),0,0,0,0,0,0);
+			$response = (array)$request["array-item-list-info"][0]->{'item-info'};
+			if($response['it-ending-info'] < 2 )
+			{
+				return false; //aukcja dalej trwa
+			} else {
+				return true; //aukcja skasowana/zakonczona
+			}
+		  }
+	//</checkIfItemSold>
 	}
 //koniec klasy
 }
