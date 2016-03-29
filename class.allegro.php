@@ -16,8 +16,7 @@ class Allegro {
 	
 	/* app configuration etc */
 	private $build = 260316;
-	private static $soap = null; //uchwyt do soapclient
-	//private $link = null; //uchwyt do allegro api
+	private $soap = null; //uchwyt do soapclient
 	private $status = array();	
 	private $login = array();	
 	private $session_handler = null;
@@ -83,6 +82,48 @@ class Allegro {
 			}
 		  }
 	//</checkIfItemSold>
+	}
+	public function checkIfItemsSold($array) {
+		/** 
+		  * checkIfItemSold
+		  * sprawdza czy dane aukcje zostaly zamkniete
+		  * @version: 1.0
+		  * @param $array array
+		  * @return  bool
+		  */
+		define('ALL_MAX_ITEMS',25);
+		
+		if(!is_array($array)) {
+			throw new Exception("Input must be array");
+		} else {
+			$count = count($array);
+			$input = array();
+			if($count <= ALL_MAX_ITEMS) {
+				$input[] = $array;
+			} else {
+				while(count($array) > 0 ) {
+					$input[] = array_splice($array,0, ALL_MAX_ITEMS);
+				}
+			}		
+			unset($array);
+			$out = array();
+			$rounds = count($input);
+			for($z = 0; $z < $rounds; $z++) {
+				$request = $this-> soap -> doGetItemsInfo($this -> session_handler, $input[$z],0,0,0,0,0,0);
+				$roundcount = count($input[$z]) ;
+				for($y = 0; $y < $roundcount; $y++ ) {
+					$response = (array)$request["array-item-list-info"][$roundcount - 1]->{'item-info'};
+					if($response['it-ending-info'] < 2 )
+					{
+						$out[$input[$z][$y]] = false;
+					} else {
+						$out[$input[$z][$y]] = true;
+					} 
+				}
+			}
+			return $out; 
+		  }
+	//</checkIfItemsSold>
 	}
 //koniec klasy
 }
